@@ -25,7 +25,7 @@ public class Main : MonoBehaviour
         });
 
         // 连接服务端
-        ClientNet.instance.Connect("127.0.0.1", 8888, (ok) =>
+        ClientNet.instance.Connect("10.11.144.31", 9080, (ok) =>
          {
              Debug.Log("连接服务器, ok: " + ok);
          });
