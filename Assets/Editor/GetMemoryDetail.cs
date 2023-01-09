@@ -12,6 +12,7 @@ using System.Threading;
 public class ExtractMemoryInfo : EditorWindow
 {
     private string connectIP = string.Empty;
+    private string filename = string.Empty;
     private static ExtractMemoryInfo Instance;
     [MenuItem("Tool/GetMemoryDetailed")]
     public static void GetMemoryDetails()
@@ -26,6 +27,8 @@ public class ExtractMemoryInfo : EditorWindow
     {
         GUILayout.Label("请输入要连接的IP：");
         connectIP = EditorGUILayout.TextField(connectIP);
+        GUILayout.Label("请输入填入的文件名：");
+        filename = EditorGUILayout.TextField(filename);
         if (GUILayout.Button("连接游戏"))
         {
             if (!string.IsNullOrEmpty(connectIP))
@@ -41,6 +44,14 @@ public class ExtractMemoryInfo : EditorWindow
         {
             ExtractMemoryDetailed();
         }
+        if (GUILayout.Button("test"))
+        {
+            Test();
+        }
+    }
+    public static void Test()
+    {
+        Debug.Log(ProfilerDriver.connectedProfiler);
     }
 
     public static void ConnectGamesAndOpenProfiler(string ip)
@@ -100,7 +111,7 @@ public class ExtractMemoryInfo : EditorWindow
         writer.Close();
         Debug.Log(string.Format("提取Profile内存数据完成（{0}）", outputPath));
     }
-    public static void ExtractMemoryDetailed2(string fileName)
+    public static void ExtractMemoryDetailedByFileName(string fileName)
     {
         var ProfilerWindow = typeof(EditorWindow).Assembly.GetType("UnityEditor.ProfilerWindow");
         var MemoryProfilerModule = typeof(EditorWindow).Assembly.GetType("UnityEditorInternal.Profiling.MemoryProfilerModule");
@@ -116,8 +127,9 @@ public class ExtractMemoryInfo : EditorWindow
         var m_Root = m_MemoryListView.GetType().GetField("m_Root", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.GetField).GetValue(m_MemoryListView);
 
         MemoryElement data = MemoryElement.Create(m_Root, -1);
+        string file = fileName + ".txt";
         string dirName = "MemoryDetailed";
-        string outputPath = string.Format("{0}/{1}/{2}", System.Environment.CurrentDirectory, dirName, fileName + ".txt");
+        string outputPath = string.Format("{0}/{1}/{2}", System.Environment.CurrentDirectory, dirName, file);
         string dir = Path.GetDirectoryName(outputPath);
         if (!Directory.Exists(dir))
         {
