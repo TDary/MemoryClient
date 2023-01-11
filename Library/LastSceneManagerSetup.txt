@@ -1,5 +1,5 @@
 sceneSetups:
-- path: Assets/Scenes/UnitySocketClient_Assets_Scenes_Main.unity
+- path: Assets/Scenes/SimpleServer.unity
   isLoaded: 1
   isActive: 1
   isSubScene: 0

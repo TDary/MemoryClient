@@ -167,3 +167,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d4376b34c2ed0549932ff2f4e50103b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isUpload: 0
+  uploadurl: http://memorycomparer.console.testplus.cn/v1/api/report/uploadFile

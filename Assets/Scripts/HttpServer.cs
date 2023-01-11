@@ -257,16 +257,20 @@ public class HttpServer : MonoBehaviour
     /// </summary>
     private void CheckFile()
     {
-        if (isUpload)
+        while (true)
         {
-            string file = Message.filename + ".txt";
-            string filePath = string.Format("{0}/{1}/{2}", System.Environment.CurrentDirectory, "MemoryDetailed", file);
-            UploadFile.HttpUploadFile(uploadurl, filePath);
-            isUpload = false;   //关闭文件上传
-        }
-        else
-        {
-            //wait
+            if (isUpload)
+            {
+                string file = Message.filename + ".txt";
+                string filePath = string.Format("{0}\\{1}\\{2}", System.Environment.CurrentDirectory, "MemoryDetailed", file);
+                UploadFile.HttpUploadFile(uploadurl, filePath);
+                UnityEngine.Debug.Log(Message.filename + "文件上传完成----");
+                isUpload = false;   //关闭文件上传
+            }
+            else
+            {
+                //wait
+            }
         }
     }
 }
