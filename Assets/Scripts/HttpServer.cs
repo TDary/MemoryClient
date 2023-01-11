@@ -50,6 +50,7 @@ public class HttpServer : MonoBehaviour
         //打开Profiler窗口
         EditorApplication.ExecuteMenuItem("Window/Analysis/Profiler");
         Message = new DataMes();
+        Message.ip = current_Ip;
         editor = Assembly.Load("Assembly-CSharp-Editor");
         type = editor.GetType("ExtractMemoryInfo");
         subthread = new Thread(HttpListenerInit);  //启用一个线程进行监听操作
@@ -97,17 +98,14 @@ public class HttpServer : MonoBehaviour
     /// </summary>
     private void Manager()
     {
-        if (!string.IsNullOrEmpty(Message.ip))
+        if (Message.isConnected && Message.istakesimple)
         {
-            if (Message.isConnected && Message.istakesimple)
-            {
-                m_CurrentState = ETM_Runstate.TakeSample;
-            }
-            else if (ProfilerDriver.connectedProfiler == -1 && Message.isConnected)
-            {
-                //由于某种原因退出了连接，再次重新连接
-                ConnectGame();
-            }
+            m_CurrentState = ETM_Runstate.TakeSample;
+        }
+        else if (ProfilerDriver.connectedProfiler == -1 && Message.isConnected)
+        {
+            //由于某种原因退出了连接，再次重新连接
+            ConnectGame();
         }
     }
 
@@ -197,8 +195,8 @@ public class HttpServer : MonoBehaviour
 
                 HttpListenerRequest request = context.Request;
                 context.Response.StatusCode = 200;
-                string ip = context.Request.QueryString["ip"];
                 string filename = context.Request.QueryString["filename"];
+                string connect = context.Request.QueryString["connectgame"];
                 string postData = new StreamReader(request.InputStream).ReadToEnd();
                 string result = string.Empty;
                 result = "Faile";
@@ -209,9 +207,8 @@ public class HttpServer : MonoBehaviour
                     m_CurrentState = ETM_Runstate.TakeSample;
                     result = "Success";
                 }
-                else if (!string.IsNullOrEmpty(ip))
+                else if (!string.IsNullOrEmpty(connect))
                 {
-                    Message.ip = ip;
                     Message.isConnected = false;
                     Message.istakesimple = false;   //先不进行TakeSample，等待下一个消息进来
                     m_CurrentState = ETM_Runstate.ConnetGame;
@@ -223,7 +220,7 @@ public class HttpServer : MonoBehaviour
                 //}
 
                 UnityEngine.Debug.Log("收到http请求：" + request.RawUrl);
-                
+
                 //UnityEngine.Debug.Log("URL: {0}"+ request.Url.OriginalString);
                 //UnityEngine.Debug.Log("Raw URL: {0}"+ request.RawUrl);
                 //UnityEngine.Debug.Log("Referred by: {0}"+ request.UrlReferrer);
