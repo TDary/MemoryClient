@@ -37,8 +37,8 @@ public class HttpServer : MonoBehaviour
     private static Thread subthread;    //HTTP监听线程
     private static Thread uploadthread;  //上传文件线程
     private float duration = 0;
-    public bool isUpload = false;
-    public string uploadurl = "http://memorycomparer.console.testplus.cn/v1/api/report/uploadFile";
+    private bool isUpload = false;
+    private string uploadurl = "http://memorycomparer.console.testplus.cn/v1/api/report/uploadFile";
     private ETM_Runstate m_CurrentState = ETM_Runstate.Check;
     public void Start()
     {
@@ -200,11 +200,14 @@ public class HttpServer : MonoBehaviour
                 string ip = context.Request.QueryString["ip"];
                 string filename = context.Request.QueryString["filename"];
                 string postData = new StreamReader(request.InputStream).ReadToEnd();
+                string result = string.Empty;
+                result = "Faile";
                 if (!string.IsNullOrEmpty(filename))
                 {
                     Message.filename = filename;
                     Message.istakesimple = true;
                     m_CurrentState = ETM_Runstate.TakeSample;
+                    result = "Success";
                 }
                 else if (!string.IsNullOrEmpty(ip))
                 {
@@ -212,6 +215,7 @@ public class HttpServer : MonoBehaviour
                     Message.isConnected = false;
                     Message.istakesimple = false;   //先不进行TakeSample，等待下一个消息进来
                     m_CurrentState = ETM_Runstate.ConnetGame;
+                    result = "Success";
                 }
                 //foreach (var item in request.QueryString)
                 //{
@@ -219,6 +223,7 @@ public class HttpServer : MonoBehaviour
                 //}
 
                 UnityEngine.Debug.Log("收到http请求：" + request.RawUrl);
+                
                 //UnityEngine.Debug.Log("URL: {0}"+ request.Url.OriginalString);
                 //UnityEngine.Debug.Log("Raw URL: {0}"+ request.RawUrl);
                 //UnityEngine.Debug.Log("Referred by: {0}"+ request.UrlReferrer);
@@ -229,7 +234,7 @@ public class HttpServer : MonoBehaviour
                 //使用Writer输出http响应代码
                 using (StreamWriter writer = new StreamWriter(context.Response.OutputStream))
                 {
-                    var reply = new { code = 200, result = "Success" };
+                    var reply = new { code = 200, result = result };
                     writer.WriteLine(reply);
 
                     writer.Close();
