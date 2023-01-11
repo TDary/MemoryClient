@@ -1,15 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
 
 public class UploadFile
 {
-    //string uploadurl = "http://memorycomparer.console.testplus.cn/v1/api/report/uploadFile";
     public static string HttpUploadFile(string url, string path)
     {
         //设置参数

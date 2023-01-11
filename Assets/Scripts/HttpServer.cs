@@ -35,7 +35,10 @@ public class HttpServer : MonoBehaviour
     private string current_Ip = string.Empty;
     private DataMes Message;
     private static Thread subthread;    //HTTP监听线程
+    private static Thread uploadthread;  //上传文件线程
     private float duration = 0;
+    public bool isUpload = false;
+    public string uploadurl = "http://memorycomparer.console.testplus.cn/v1/api/report/uploadFile";
     private ETM_Runstate m_CurrentState = ETM_Runstate.Check;
     public void Start()
     {
@@ -50,6 +53,8 @@ public class HttpServer : MonoBehaviour
         editor = Assembly.Load("Assembly-CSharp-Editor");
         type = editor.GetType("ExtractMemoryInfo");
         subthread = new Thread(HttpListenerInit);  //启用一个线程进行监听操作
+        uploadthread = new Thread(CheckFile);//启用一个线程进行上传文件操作
+        uploadthread.Start();
         subthread.Start();
     }
     public void Update()
@@ -98,10 +103,6 @@ public class HttpServer : MonoBehaviour
             {
                 m_CurrentState = ETM_Runstate.TakeSample;
             }
-            else if (!Message.isConnected)
-            {
-                m_CurrentState = ETM_Runstate.ConnetGame;
-            }
             else if (ProfilerDriver.connectedProfiler == -1 && Message.isConnected)
             {
                 //由于某种原因退出了连接，再次重新连接
@@ -121,13 +122,14 @@ public class HttpServer : MonoBehaviour
     private void CheckWriting()
     {
         //等待
-        duration += duration + Time.deltaTime;
-        if (duration > 200)
+        duration += 0.02f;
+        if (duration > 20)
         {
             //由于时序问题，在此等待一段时间再进行写入文件
             type.GetMethod("ExtractMemoryDetailedByFileName").Invoke(null, new object[] { Message.filename });
             Message.canWriteFile = false;
             m_CurrentState = ETM_Runstate.Check;
+            isUpload = true;   //开启文件上传
             duration = 0;
         }
         else
@@ -142,8 +144,8 @@ public class HttpServer : MonoBehaviour
     private void CheckTakeSample()
     {
         //等待
-        duration += duration + Time.deltaTime;
-        if (duration > 500)
+        duration += 0.02f;
+        if (duration > 50)
         {
             UnityEngine.Debug.Log("Take Sample成功----");
             //等待5秒钟成功刷新完内存后,代表可以进行写文件的操作
@@ -202,12 +204,14 @@ public class HttpServer : MonoBehaviour
                 {
                     Message.filename = filename;
                     Message.istakesimple = true;
+                    m_CurrentState = ETM_Runstate.TakeSample;
                 }
                 else if (!string.IsNullOrEmpty(ip))
                 {
                     Message.ip = ip;
                     Message.isConnected = false;
                     Message.istakesimple = false;   //先不进行TakeSample，等待下一个消息进来
+                    m_CurrentState = ETM_Runstate.ConnetGame;
                 }
                 //foreach (var item in request.QueryString)
                 //{
@@ -246,5 +250,23 @@ public class HttpServer : MonoBehaviour
         processStartInfo.UseShellExecute = false;
         processStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
         Process.Start(processStartInfo).WaitForExit();
+    }
+
+    /// <summary>
+    /// 确认是否可以进行上传文件
+    /// </summary>
+    private void CheckFile()
+    {
+        if (isUpload)
+        {
+            string file = Message.filename + ".txt";
+            string filePath = string.Format("{0}/{1}/{2}", System.Environment.CurrentDirectory, "MemoryDetailed", file);
+            UploadFile.HttpUploadFile(uploadurl, filePath);
+            isUpload = false;   //关闭文件上传
+        }
+        else
+        {
+            //wait
+        }
     }
 }
