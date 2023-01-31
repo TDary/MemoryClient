@@ -6,7 +6,6 @@ using System.Threading;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
-
 /// <summary>
 /// 内部状态码
 /// </summary>
@@ -19,6 +18,7 @@ enum ETM_Runstate
     WaitForConncect = 4,
     WaitForTakingSample = 5,
     WaitForWriting = 6,
+    DisConnectGame = 7,
 }
 public class HttpServer : MonoBehaviour
 {
@@ -91,6 +91,10 @@ public class HttpServer : MonoBehaviour
         {
             m_CurrentState = ETM_Runstate.WaitForWriting;
         }
+        else if(m_CurrentState == ETM_Runstate.DisConnectGame)
+        {
+            DisConnect();
+        }
     }
 
     /// <summary>
@@ -107,6 +111,15 @@ public class HttpServer : MonoBehaviour
             //由于某种原因退出了连接，再次重新连接
             ConnectGame();
         }
+    }
+
+    private void DisConnect()
+    {
+        ProfilerDriver.DirectIPConnect("");
+        ProfilerDriver.ClearAllFrames();
+        Message.isConnected = false;
+        m_CurrentState = ETM_Runstate.Check;
+        UnityEngine.Debug.Log("断开游戏连接----");
     }
 
     private void ConnectGame()
@@ -209,10 +222,18 @@ public class HttpServer : MonoBehaviour
                 }
                 else if (!string.IsNullOrEmpty(connect))
                 {
-                    Message.isConnected = false;
-                    Message.istakesimple = false;   //先不进行TakeSample，等待下一个消息进来
-                    m_CurrentState = ETM_Runstate.ConnetGame;
-                    result = "Success";
+                    if(connect == "1")
+                    {
+                        Message.isConnected = false;
+                        Message.istakesimple = false;   //先不进行TakeSample，等待下一个消息进来
+                        m_CurrentState = ETM_Runstate.ConnetGame;
+                        result = "Success";
+                    }
+                    else if(connect == "0")
+                    {
+                        m_CurrentState = ETM_Runstate.DisConnectGame;
+                        result = "Success";
+                    }
                 }
                 //foreach (var item in request.QueryString)
                 //{
