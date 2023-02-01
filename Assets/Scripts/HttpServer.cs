@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Reflection;
@@ -40,6 +41,7 @@ public class HttpServer : MonoBehaviour
     private bool isUpload = false;
     private string uploadurl = "http://memorycomparer.console.testplus.cn/v1/api/report/uploadFile";
     private ETM_Runstate m_CurrentState = ETM_Runstate.Check;
+    private bool isConnectMess = false;
     public void Start()
     {
         IPHostEntry ipEntry = Dns.GetHostEntry(Dns.GetHostName());
@@ -110,6 +112,11 @@ public class HttpServer : MonoBehaviour
         {
             //由于某种原因退出了连接，再次重新连接
             ConnectGame();
+        }else if (isConnectMess)
+        {
+            //有断开连接的消息进来，则进入断开流程
+            m_CurrentState = ETM_Runstate.DisConnectGame;
+            isConnectMess = false;   //状态回归
         }
     }
 
@@ -195,6 +202,7 @@ public class HttpServer : MonoBehaviour
     /// </summary>
     private void HttpListenerInit()
     {
+        string currentTime = string.Empty;
         using (HttpListener listerner = new HttpListener())
         {
             listerner.AuthenticationSchemes = AuthenticationSchemes.Anonymous;
@@ -216,7 +224,8 @@ public class HttpServer : MonoBehaviour
                 result = "Faile";
                 if (!string.IsNullOrEmpty(filename))
                 {
-                    Message.filename = filename;
+                    currentTime = DateTime.Now.ToString().Replace('/', '-').Replace(':', '-');
+                    Message.filename = filename + currentTime;
                     Message.istakesimple = true;
                     m_CurrentState = ETM_Runstate.TakeSample;
                     result = "Success";
@@ -232,7 +241,7 @@ public class HttpServer : MonoBehaviour
                     }
                     else if(connect == "0")
                     {
-                        m_CurrentState = ETM_Runstate.DisConnectGame;
+                        isConnectMess = true;
                         result = "Success";
                     }
                 }
