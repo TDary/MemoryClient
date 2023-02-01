@@ -142,6 +142,7 @@ public class HttpServer : MonoBehaviour
             m_CurrentState = ETM_Runstate.Check;
             isUpload = true;   //开启文件上传
             duration = 0;
+            UnityEngine.Debug.Log("开始上传文件：" + Message.filename);
         }
         else
         {
