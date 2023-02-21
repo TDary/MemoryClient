@@ -57,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Main.cs" />
+    <Compile Include="Assets\Scripts\AniEvent.cs" />
     <Compile Include="Assets\Scripts\HttpServer.cs" />
     <Compile Include="Assets\Scripts\UploadFile.cs" />
     <Compile Include="Assets\Scripts\ClientNet.cs" />
