@@ -48,6 +48,10 @@ public class HttpServer : MonoBehaviour
         foreach (var ip in ipEntry.AddressList)
         {
             current_Ip = ip.ToString();
+            if (current_Ip.Contains("10.11"))
+            {
+                break;
+            }
         }
         //打开Profiler窗口
         EditorApplication.ExecuteMenuItem("Window/Analysis/Profiler");
